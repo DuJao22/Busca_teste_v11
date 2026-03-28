@@ -318,7 +318,7 @@ Você recebeu o seguinte link do Google Maps: ${url}
 ${placeNameHint ? `\nDica: O nome do estabelecimento extraído da URL parece ser "${placeNameHint}".` : ''}
 
 Sua missão é OBRIGATÓRIA:
-1. USE A FERRAMENTA DO GOOGLE MAPS (Google Maps Tool) para pesquisar este link ou o nome do estabelecimento que aparece na URL.
+1. Analise cuidadosamente a URL fornecida e a dica de nome (se houver) para identificar o estabelecimento.
 2. Descubra EXATAMENTE qual é o estabelecimento real (nome, nicho, endereço, telefone).
 3. Se o link for genérico, quebrado, ou se você NÃO TIVER 100% DE CERTEZA de qual é o estabelecimento exato, você DEVE definir "success" como false e preencher o "errorMessage" explicando que não foi possível identificar o local e pedindo para o usuário verificar o link.
 4. Se você encontrou o estabelecimento com sucesso, defina "success" as true e extraia os dados reais: Nome da empresa, telefone (apenas números com DDD), endereço completo e cidade.
@@ -340,8 +340,8 @@ RETORNE APENAS UM JSON VÁLIDO com a seguinte estrutura exata (sem formatação 
 
 NÃO INVENTE DADOS. Se não souber ou não encontrar o local exato, retorne success: false.`,
       config: {
-        tools: [{ googleMaps: {} }],
-        toolConfig: { includeServerSideToolInvocations: true }
+        // Removido o uso de tools (googleMaps/googleSearch) pois causa erro 429 em contas gratuitas.
+        // A IA consegue extrair os dados diretamente da URL expandida.
       }
     });
 
