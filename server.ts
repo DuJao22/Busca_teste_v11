@@ -318,7 +318,7 @@ Você recebeu o seguinte link do Google Maps: ${url}
 ${placeNameHint ? `\nDica: O nome do estabelecimento extraído da URL parece ser "${placeNameHint}".` : ''}
 
 Sua missão é OBRIGATÓRIA:
-1. USE A FERRAMENTA DE BUSCA DO GOOGLE (Google Search) para pesquisar este link ou o nome do estabelecimento que aparece na URL.
+1. USE A FERRAMENTA DO GOOGLE MAPS (Google Maps Tool) para pesquisar este link ou o nome do estabelecimento que aparece na URL.
 2. Descubra EXATAMENTE qual é o estabelecimento real (nome, nicho, endereço, telefone).
 3. Se o link for genérico, quebrado, ou se você NÃO TIVER 100% DE CERTEZA de qual é o estabelecimento exato, você DEVE definir "success" como false e preencher o "errorMessage" explicando que não foi possível identificar o local e pedindo para o usuário verificar o link.
 4. Se você encontrou o estabelecimento com sucesso, defina "success" as true e extraia os dados reais: Nome da empresa, telefone (apenas números com DDD), endereço completo e cidade.
@@ -326,25 +326,22 @@ Sua missão é OBRIGATÓRIA:
 6. Crie uma DESCRIÇÃO detalhada do negócio.
 7. Liste os principais serviços oferecidos (ou que fazem sentido para o nicho), separados por vírgula.
 
+RETORNE APENAS UM JSON VÁLIDO com a seguinte estrutura exata (sem formatação markdown como \`\`\`json):
+{
+  "success": true/false,
+  "errorMessage": "mensagem de erro se success for false",
+  "name": "Nome da Empresa",
+  "phone": "Telefone",
+  "address": "Endereço Completo",
+  "city": "Cidade",
+  "description": "Descrição",
+  "services": "Serviços"
+}
+
 NÃO INVENTE DADOS. Se não souber ou não encontrar o local exato, retorne success: false.`,
       config: {
-        tools: [{ googleSearch: {} }],
-        toolConfig: { includeServerSideToolInvocations: true },
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            success: { type: Type.BOOLEAN },
-            errorMessage: { type: Type.STRING },
-            name: { type: Type.STRING },
-            phone: { type: Type.STRING },
-            address: { type: Type.STRING },
-            city: { type: Type.STRING },
-            description: { type: Type.STRING },
-            services: { type: Type.STRING }
-          },
-          required: ["success"]
-        }
+        tools: [{ googleMaps: {} }],
+        toolConfig: { includeServerSideToolInvocations: true }
       }
     });
 
@@ -352,7 +349,15 @@ NÃO INVENTE DADOS. Se não souber ou não encontrar o local exato, retorne succ
       throw new Error('A IA não retornou uma resposta válida.');
     }
 
-    const result = JSON.parse(response.text);
+    let result;
+    try {
+      const cleanText = response.text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      result = JSON.parse(cleanText);
+    } catch (parseError) {
+      console.error("JSON Parse Error:", parseError, "Raw text:", response.text);
+      throw new Error("A resposta da IA não estava em um formato válido. Tente novamente.");
+    }
+    
     return res.json(result);
 
   } catch (error: any) {
@@ -360,7 +365,7 @@ NÃO INVENTE DADOS. Se não souber ou não encontrar o local exato, retorne succ
     
     let friendlyError = error.message || 'Erro interno ao analisar o link';
     if (friendlyError.includes('429') || friendlyError.includes('RESOURCE_EXHAUSTED') || friendlyError.includes('quota')) {
-      friendlyError = 'Limite de cota atingido (Erro 429). A ferramenta de busca do Google (Google Search) no Gemini tem limites diários. Se você estiver no plano gratuito, tente novamente mais tarde ou mude para um plano pago no Google AI Studio.';
+      friendlyError = 'Limite de cota atingido (Erro 429). A ferramenta do Google Maps no Gemini tem limites diários. IMPORTANTE: Se você trocou a chave no Render, lembre-se de atualizá-la também no menu "Configurações" deste painel, pois a chave salva lá tem prioridade.';
     } else if (friendlyError.includes('API_KEY_INVALID') || friendlyError.includes('invalid API key')) {
       friendlyError = 'Chave de API inválida. Por favor, verifique a chave configurada nas Configurações.';
     }

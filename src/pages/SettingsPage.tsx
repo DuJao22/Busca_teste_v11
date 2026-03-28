@@ -115,6 +115,11 @@ export default function SettingsPage() {
               <p className="mt-2 text-sm text-zinc-500">
                 Você pode gerar uma chave gratuitamente no <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:text-emerald-500 underline">Google AI Studio</a>.
               </p>
+              <div className="mt-3 bg-blue-50 p-3 rounded-md border border-blue-100">
+                <p className="text-xs text-blue-800">
+                  <strong>Nota:</strong> A chave salva aqui no painel tem prioridade sobre a chave configurada nas variáveis de ambiente do servidor (Render/Vercel). Se você atualizou a chave no servidor, certifique-se de atualizá-la aqui também, ou deixe este campo vazio para usar a chave do servidor.
+                </p>
+              </div>
             </div>
 
             <div className="pt-6 border-t border-zinc-200">
