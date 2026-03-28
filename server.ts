@@ -380,6 +380,8 @@ NÃO INVENTE DADOS. Se não souber ou não encontrar o local exato, retorne succ
     let friendlyError = error.message || 'Erro interno ao analisar o link';
     if (friendlyError.includes('429') || friendlyError.includes('RESOURCE_EXHAUSTED') || friendlyError.includes('quota')) {
       friendlyError = 'Limite de cota atingido (Erro 429). A ferramenta do Google Maps no Gemini tem limites diários. IMPORTANTE: Se você trocou a chave no Render, lembre-se de atualizá-la também no menu "Configurações" deste painel, pois a chave salva lá tem prioridade.';
+    } else if (friendlyError.includes('503') || friendlyError.includes('UNAVAILABLE') || friendlyError.includes('high demand')) {
+      friendlyError = 'Os servidores da Inteligência Artificial estão sobrecarregados no momento (Erro 503). Isso é temporário. Por favor, aguarde alguns instantes e tente novamente.';
     } else if (friendlyError.includes('API_KEY_INVALID') || friendlyError.includes('invalid API key')) {
       friendlyError = 'Chave de API inválida. Por favor, verifique a chave configurada nas Configurações.';
     }
