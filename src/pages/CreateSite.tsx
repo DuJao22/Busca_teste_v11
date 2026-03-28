@@ -156,7 +156,7 @@ NÃO INVENTE DADOS. Se não souber ou não encontrar o local exato, retorne succ
         try {
           saveData = await saveRes.json();
         } catch (e) {
-          throw new Error('Erro no servidor ao salvar os dados. (Verifique os logs da Vercel)');
+          throw new Error(`Erro no servidor ao salvar os dados (Status: ${saveRes.status}). O servidor pode estar indisponível ou ocorreu um erro interno.`);
         }
         
         if (!saveRes.ok) throw new Error(saveData.error || 'Erro ao salvar dados');

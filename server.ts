@@ -184,15 +184,29 @@ app.post('/api/analyze/save', authenticateToken, (req: any, res) => {
   }
 
   // Save to DB for history (reusing sites table)
-  const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + 30); // 30 days from now
+  try {
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 30); // 30 days from now
 
-  const result = db.prepare(`
-    INSERT INTO sites (slug, name, phone, address, city, description, services, map_link, image_url, expires_at, user_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(filename, data.name || 'Desconhecido', data.phone || '', data.address || '', data.city || '', data.description || '', data.services || '', data.map_link || '', data.image_url || '', expiresAt.toISOString(), req.user.id);
+    const servicesStr = Array.isArray(data.services) ? data.services.join(', ') : (data.services || '');
+    const nameStr = String(data.name || 'Desconhecido');
+    const phoneStr = String(data.phone || '');
+    const addressStr = String(data.address || '');
+    const cityStr = String(data.city || '');
+    const descriptionStr = String(data.description || '');
+    const mapLinkStr = String(data.map_link || '');
+    const imageUrlStr = String(data.image_url || '');
 
-  res.json({ id: result.lastInsertRowid, filename });
+    const result = db.prepare(`
+      INSERT INTO sites (slug, name, phone, address, city, description, services, map_link, image_url, expires_at, user_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(filename, nameStr, phoneStr, addressStr, cityStr, descriptionStr, servicesStr, mapLinkStr, imageUrlStr, expiresAt.toISOString(), req.user.id);
+
+    res.json({ id: result.lastInsertRowid, filename });
+  } catch (dbErr: any) {
+    console.error('Database error when saving site:', dbErr);
+    return res.status(500).json({ error: 'Erro no banco de dados ao salvar: ' + dbErr.message });
+  }
 });
 
 // List Analyzed Links
