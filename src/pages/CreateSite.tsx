@@ -5,7 +5,7 @@ import { Sparkles, CheckCircle, Download, FileJson, Copy, AlertTriangle } from '
 import { GoogleGenAI, Type } from '@google/genai';
 
 export default function CreateSite() {
-  const { token } = useAuth();
+  const { token, logout } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -159,7 +159,14 @@ NÃO INVENTE DADOS. Se não souber ou não encontrar o local exato, retorne succ
           throw new Error(`Erro no servidor ao salvar os dados (Status: ${saveRes.status}). O servidor pode estar indisponível ou ocorreu um erro interno.`);
         }
         
-        if (!saveRes.ok) throw new Error(saveData.error || 'Erro ao salvar dados');
+        if (!saveRes.ok) {
+          if (saveRes.status === 401 || saveRes.status === 403) {
+            logout();
+            navigate('/login');
+            throw new Error('Sessão expirada. Por favor, faça login novamente.');
+          }
+          throw new Error(saveData.error || 'Erro ao salvar dados');
+        }
 
         setSuccessData({ filename: saveData.filename, id: saveData.id, data: extractedData });
       }

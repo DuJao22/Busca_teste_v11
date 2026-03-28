@@ -44,6 +44,13 @@ const authenticateToken = (req: any, res: any, next: any) => {
 
   jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
     if (err) return res.sendStatus(403);
+    
+    // Verify user still exists in DB
+    const dbUser = db.prepare('SELECT id FROM users WHERE id = ?').get(user.id);
+    if (!dbUser) {
+      return res.status(401).json({ error: 'Usuário não encontrado ou sessão expirada. Por favor, faça login novamente.' });
+    }
+    
     req.user = user;
     next();
   });
